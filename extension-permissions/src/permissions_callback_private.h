@@ -1,6 +1,6 @@
 #if defined(DM_PLATFORM_ANDROID)
 
-#include <dmsdk/dlib/android.h>
+#include <dmsdk/sdk.h>
 
 namespace dmPermissions {
 
@@ -12,6 +12,18 @@ namespace dmPermissions {
         PERMISSION_DENIED = 2,
         PERMISSION_SHOW_RATIONALE = 3
     };
+
+    struct CallbackData
+    {
+        char* json;
+    };
+
+    void SetLuaCallback(lua_State* L, int pos);
+    void UpdateCallback();
+    void InitializeCallback();
+    void FinalizeCallback();
+
+    void AddToQueueCallback(const char*json);
 
 } //namespace dmPermissions
 

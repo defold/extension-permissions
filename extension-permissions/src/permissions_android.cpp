@@ -1,8 +1,15 @@
 #if defined(DM_PLATFORM_ANDROID)
 
-#include <dmsdk/dlib/android.h>
 #include "permissions_private.h"
 #include "permissions_callback_private.h"
+#include "com_defold_permissions_PermissionsJNI.h"
+
+JNIEXPORT void JNICALL Java_com_defold_permissions_PermissionsJNI_permissionsAddToQueue(JNIEnv * env, jclass cls, jstring jjson)
+{
+    const char* json = env->GetStringUTFChars(jjson, 0);
+    dmPermissions::AddToQueueCallback(json);
+    env->ReleaseStringUTFChars(jjson, json);
+}
 
 namespace dmPermissions {
 
@@ -11,6 +18,7 @@ namespace dmPermissions {
         jobject        m_PermissionsJNI;
 
         jmethodID      m_Check;
+        jmethodID      m_Request;
 
     };
 
@@ -29,6 +37,7 @@ namespace dmPermissions {
     static void InitJNIMethods(JNIEnv* env, jclass cls)
     {
         g_permissions.m_Check = env->GetMethodID(cls, "check", "(Ljava/lang/String;)I");
+        g_permissions.m_Request = env->GetMethodID(cls, "request", "([Ljava/lang/String;)V");
     }
 
     void Initialize_Ext()
@@ -48,6 +57,22 @@ namespace dmPermissions {
     {
         int result = CallIntMethodChar(g_permissions.m_PermissionsJNI, g_permissions.m_Check, permission);
         return result;
+    }
+
+    void Request(const char **permissions, int len)
+    {
+        dmAndroid::ThreadAttacher threadAttacher;
+        JNIEnv* env = threadAttacher.GetEnv();
+
+        jobjectArray jPermissions = (jobjectArray)env->NewObjectArray(len, env->FindClass("java/lang/String"), NULL);
+        for (int i = 0; i < len; i++)
+        {
+            jstring jPermission = env->NewStringUTF(permissions[i]);
+            env->SetObjectArrayElement(jPermissions, i, jPermission);
+            env->DeleteLocalRef(jPermission);
+        }
+        env->CallVoidMethod(g_permissions.m_PermissionsJNI, g_permissions.m_Request, jPermissions);
+        env->DeleteLocalRef(jPermissions);
     }
 
 } //namespace dmPermissions

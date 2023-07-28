@@ -22,9 +22,32 @@ namespace dmPermissions {
         return 1;
     }
 
+    static int Lua_Request(lua_State* L)
+    {
+        DM_LUA_STACK_CHECK(L, 0);
+        if (lua_type(L, 1) != LUA_TTABLE) {
+            return DM_LUA_ERROR("Expected table, got %s. Wrong type for permissions variable '%s'.", luaL_typename(L, 1), lua_tostring(L, 1));
+        }
+        if (lua_type(L, 2) != LUA_TFUNCTION) {
+            return DM_LUA_ERROR("Expected function, got %s. Wrong type for permissions variable '%s'.", luaL_typename(L, 2), lua_tostring(L, 2));
+        }
+        int len = lua_objlen(L, 1);
+        const char *permissions[len];
+        for (int i = 0; i < len; i++)
+        {
+            lua_rawgeti(L, 1, i + 1);
+            permissions[i] = lua_tostring(L, -1);
+            lua_pop(L, 1);
+        }
+        SetLuaCallback(L, 2);
+        Request(permissions, len);
+        return 1;
+    }
+
     static const luaL_reg Module_methods[] =
     {
         {"check", Lua_Check},
+        {"request", Lua_Request},
         {0, 0}
     };
 
@@ -48,17 +71,25 @@ namespace dmPermissions {
     {
         LuaInit(params->m_L);
         Initialize_Ext();
+        InitializeCallback();
+        return dmExtension::RESULT_OK;
+    }
+
+    static dmExtension::Result Update(dmExtension::Params* params)
+    {
+        UpdateCallback();
         return dmExtension::RESULT_OK;
     }
 
     static dmExtension::Result Finalize(dmExtension::Params* params)
     {
+        FinalizeCallback();
         return dmExtension::RESULT_OK;
     }
 
-} //namespace dmPermissions
+} //namespace
 
-DM_DECLARE_EXTENSION(EXTENSION_NAME, LIB_NAME, 0, 0, dmPermissions::Initialize, 0, 0, dmPermissions::Finalize)
+DM_DECLARE_EXTENSION(EXTENSION_NAME, LIB_NAME, 0, 0, dmPermissions::Initialize, dmPermissions::Update, 0, dmPermissions::Finalize)
 
 #else
 

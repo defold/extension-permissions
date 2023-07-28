@@ -24,6 +24,16 @@ function init(self)
         permission = "android.permission.POST_NOTIFICATIONS"
         result = permissions.check(permission)
         log(result, permission)
+
+        print("request")
         
+        permissions.request({
+            "android.permission.POST_NOTIFICATIONS",
+            "android.permission.ACCESS_NETWORK_STATE"},
+            function(self, result)
+                for permission, result in pairs(result) do
+                    log(result, permission)
+                end
+            end)
     end
 end
