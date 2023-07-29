@@ -16,4 +16,5 @@ include_dirs = myextension
 
 [android]
 package = com.defold.permissions
+manifest = /AndroidManifest.xml
 

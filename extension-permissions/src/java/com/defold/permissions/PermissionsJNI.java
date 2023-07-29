@@ -1,16 +1,23 @@
 package com.defold.permissions;
 
 import android.os.Build;
+import android.os.Bundle;
 import android.app.Activity;
 import android.content.pm.PackageManager;
 import androidx.core.content.ContextCompat;
 import androidx.core.app.ActivityCompat;
+import android.app.Fragment;
+import android.app.FragmentManager;
+import android.app.FragmentTransaction;
 
 import org.json.JSONObject;
 import org.json.JSONException;
 
+import java.util.Map;
+
 public class PermissionsJNI {
     private static final String TAG = "PermissionsJNI";
+    private static final int REQUEST_CODE = 6894;
 
     public static native void permissionsAddToQueue(String json);
 
@@ -21,9 +28,12 @@ public class PermissionsJNI {
     private static final int PERMISSION_SHOW_RATIONALE =  3;
 
     private Activity activity;
+    private PermissionsFragment permissionsFragment;
 
     public PermissionsJNI(Activity activity) {
         this.activity = activity;
+        this.permissionsFragment = new PermissionsFragment();
+        activity.getFragmentManager().beginTransaction().add(permissionsFragment, PermissionsFragment.TAG).commit();
     }
 
     public int check(String permission) {
@@ -61,12 +71,17 @@ public class PermissionsJNI {
             permissionsAddToQueue(message);
         }
         else {
-
+            activity.runOnUiThread(new Runnable() {
+                @Override
+                public void run() {
+                    permissionsFragment.requestPermissions(permissions, REQUEST_CODE);
+                }
+            });
         }
     }
 
     // https://www.baeldung.com/java-json-escaping
-    private String getJsonConversionErrorMessage(String messageText) {
+    private static String getJsonConversionErrorMessage(String messageText) {
         String message = null;
         try {
             JSONObject obj = new JSONObject();
@@ -77,5 +92,33 @@ public class PermissionsJNI {
             message = "{ \"error\": \"Error while converting message to JSON.\" }";
         }
         return message;
+    }
+
+    public static class PermissionsFragment extends Fragment {
+        public static final String TAG = "PermissionsFragment";
+
+        @Override
+        public void onCreate(Bundle savedInstanceState) {
+            super.onCreate(savedInstanceState);
+            setRetainInstance(true);
+        }
+       
+        @Override
+        public void onRequestPermissionsResult(int requestCode, String[] permissions, int[] grantResults) {
+            if (requestCode == REQUEST_CODE) {
+                String message = null;
+                try {
+                    JSONObject obj = new JSONObject();
+                    for (int i = 0; i < permissions.length; i++) {
+                        obj.put(permissions[i], grantResults[i] == PackageManager.PERMISSION_GRANTED ? PERMISSION_GRANTED : PERMISSION_DENIED);
+                    }
+                    message = obj.toString();
+                }
+                catch (JSONException e) {
+                    message = getJsonConversionErrorMessage(e.getLocalizedMessage());
+                }
+                permissionsAddToQueue(message);
+            }
+        }
     }
 }

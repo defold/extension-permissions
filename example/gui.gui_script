@@ -1,4 +1,6 @@
-function log(result, permission)
+local log = require("example.log")
+
+function print_to_log(result, permission)
     if result == permissions.PERMISSION_DENIED then
         -- You can directly ask for the permission.
         print(permission .. " PERMISSION_DENIED")
@@ -15,25 +17,35 @@ function log(result, permission)
     end
 end
 
+local function request(permissions_table)
+    print("Request: ")
+    for k, value in pairs(permissions_table) do
+        print(value)
+    end
+    permissions.request(permissions_table,
+    function(self, result)
+        print("Result:")
+        for permission, result in pairs(result) do
+            print_to_log(result, permission)
+        end
+    end)
+end
+
 function init(self)
     if permissions then
         local permission = "android.permission.ACCESS_NETWORK_STATE"
         local result = permissions.check(permission)
-        log(result, permission)
-        
+        print("Check:")
+        print_to_log(result, permission)
+
         permission = "android.permission.POST_NOTIFICATIONS"
         result = permissions.check(permission)
-        log(result, permission)
+        print_to_log(result, permission)
 
-        print("request")
-        
-        permissions.request({
-            "android.permission.POST_NOTIFICATIONS",
-            "android.permission.ACCESS_NETWORK_STATE"},
-            function(self, result)
-                for permission, result in pairs(result) do
-                    log(result, permission)
-                end
-            end)
+        request({"android.permission.WRITE_EXTERNAL_STORAGE", "android.permission.READ_CONTACTS"})
     end
+end
+
+function update(self)
+    log.update(gui.get_node("text"))
 end
