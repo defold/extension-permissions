@@ -33,6 +33,7 @@ end
 
 function init(self)
     if permissions then
+        log.print_all_sdk_ent()
         local permission = "android.permission.ACCESS_NETWORK_STATE"
         local result = permissions.check(permission)
         print("Check:")

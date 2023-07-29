@@ -49,7 +49,7 @@ end
 
 function M.print_all_sdk_ent()
     print("----ALL-SDK-entities----")
-    for k, v in pairs(_G.promisses) do
+    for k, v in pairs(_G.permissions) do
         if type(v) == "function" then
             v = "()"
         else
