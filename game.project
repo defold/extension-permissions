@@ -12,7 +12,7 @@ height = 640
 title = extension-permissions
 
 [library]
-include_dirs = myextension
+include_dirs = extension-permissions
 
 [android]
 package = com.defold.permissions
