@@ -7,6 +7,7 @@ brief: Extension to query for and request application permissions from the user 
 
 This extension provides functions to query for and request application permissions from the user or operating system.
 At the moment it supports only Android.
+Android API level 23 or newer is required.
 
 
 ## Installation

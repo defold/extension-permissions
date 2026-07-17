@@ -17,4 +17,4 @@ include_dirs = extension-permissions
 [android]
 package = com.defold.permissions
 manifest = /AndroidManifest.xml
-
+minimum_sdk_version = 23
