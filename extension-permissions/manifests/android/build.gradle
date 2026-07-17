@@ -1,7 +1,8 @@
 repositories {
+    google()
     mavenCentral()
 }
 
 dependencies {
-    implementation 'androidx.core:core:1.2.0'
+    implementation 'androidx.core:core:1.19.0'
 }
