@@ -4,6 +4,6 @@ repositories {
 }
 
 dependencies {
-    // Core 1.19 requires compileSdk 37; Extender currently provides compileSdk 36.
-    implementation 'androidx.core:core:1.18.0'
+    // Core 1.18 targets API 36.1; Extender currently compiles against API 36.
+    implementation 'androidx.core:core:1.17.0'
 }
