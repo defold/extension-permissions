@@ -70,8 +70,8 @@ namespace dmPermissions {
     static dmExtension::Result Initialize(dmExtension::Params* params)
     {
         LuaInit(params->m_L);
-        Initialize_Ext();
         InitializeCallback();
+        Initialize_Ext();
         return dmExtension::RESULT_OK;
     }
 
